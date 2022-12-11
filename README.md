@@ -1,5 +1,6 @@
 # MBConicHulls
-MBConicHulls: a Mathematica package to evaluate N-fold MB integrals. See [2012.15108](https://arxiv.org/abs/2012.15108) for more details.
+MBConicHulls: a Mathematica package to evaluate N-fold MB integrals. Version 1.0 is idential to the one published in [2012.15108](https://arxiv.org/abs/2012.15108) and 
+[Phys. Rev. Lett. 127, 151601](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.127.151601).
 
 ```
 ███╗   ███╗██████╗  ██████╗ ██████╗ ███╗   ██╗██╗ ██████╗██╗  ██╗██╗   ██╗██╗     ██╗     ███████╗
