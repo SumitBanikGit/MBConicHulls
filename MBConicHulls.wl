@@ -11,31 +11,85 @@ Off[SymbolName::sym];
 MBRep::"usage"="MBRep[PreFac_,IntVar_,MBVar_,MBArg_] inputs the MB integral in a form that can be processed by the package where :\n\
 PreFac - is the prefactor of the MB integral.\n\
 IntVar - takes in the list of integration variables.\n\
-MBVar - takes in the list of parameters, where MBVar[[i]] is raised to the power IntVar[[i]]\n\
-MBArg - is a list consisting of two sublists of the form {{numerator},{denominator}}, where the elements of {numerator} and {denominator} are the arguments of gamma function in the numerator and denominator of the MB integrand, respectively.";
-ResolveMB::"usage"="ResolveMB[MBRepOut_,N_]  returns the type of integral (degenerate or non-degenerate) and the total number of conic hulls, and then goes on to display the list of intersecting conic hulls and the sets of poles for each series representation along with the master series characteristic list and variables for degenerate case. The function arguments are: \n\
+MBVar - takes in the list of parameters, where MBVar[[i]] is raised to the power IntVar[[i]].\n\
+MBArg - is a list consisting of two sublists of the form {{numerator},{denominator}}, where the elements of {numerator} and {denominator} are the arguments of the gamma functions in the numerator and denominator of the MB integrand, respectively.";
+ResolveMB::"usage"="ResolveMB[MBRepOut_,N_]  returns the type of integral (degenerate or nondegenerate) and the total number of conic hulls, and then goes on to display the list of relevant intersecting conic hulls and the sets of poles for each series representation along with the master series characteristic list and variables for the degenerate case. The function arguments are: \n\
 MBRepOut - is the output of the MBRep[] function. \n\
-N - is an optional parameter indicating the total number of series of the integral that we wish to evaluate. If N is not specified, then all the non-zero series are shown.";
-EvaluateSeries::"usage"="EvaluateSeries[ResolveMBOut_, MBParaSub_, SeriesNum_] function calculates and prints the series expression of the series representation SeriesNum. The function arguments are: \n\
+N - is an optional parameter indicating the total number of series of the integral that one wishes to evaluate. If N is not specified, then all the non-zero series are shown.";
+EvaluateSeries::"usage"="EvaluateSeries[ResolveMBOut_, MBParaSub_, SeriesNum_] calculates and prints the series expression of the series representation SeriesNum. The function arguments are: \n\
 ResolveMBOut - is the output of the ResolveMB[] function. \n\
 MBParaSub - is a list of substitutions to be made to the parameters in the arguments of the gamma functions of the integrand. \n\
 SeriesNum - is the number, as enumerated in the output of ResolveMB[], of the series for which we wish to calculate residues.
 ";
-SumAllSeries::"usage"="SumAllSeries[EvaluateSeriesOut_,MBVarSub_,SumLim_,RunInParallel-> Bool,NumericalPrecision -> PositiveIntegers] function numerically sum the series of the particular series representation evaluated by EvaluateSeries[] and prints the result. The function arguments are: \n\
+SumAllSeries::"usage"="SumAllSeries[EvaluateSeriesOut_,MBVarSub_,SumLim_,RunInParallel-> Bool,NumericalPrecision -> PositiveIntegers] numerically sums the series of the particular series representation evaluated by EvaluateSeries[] and prints the result. The function arguments are: \n\
 EvaluateSeriesOut - is the output of the EvaluateSeries[] function. \n\
-MBVarSub - is a list of substituions to provide numerical values to the parameters in MBVar. \n\
-SumLim - is the upper limit of all the summation index of the residue sum. \n\
-RunInParallel -> Bool is an optional parameter indicating whether the sum to be performed using Mathematica's parallel processing functionality. The default value of Bool is False. \n\
-NumericalPrecision -> PositiveIntegers is an optional parameter of SumAllSeries[], which determines the precision of the numerical value of the series representation. The default value is MachinePrecision.";
+MBVarSub - is a list of substitutions to provide numerical values to the parameters in MBVar. \n\
+SumLim - is the upper limit of all the summation indices of the residue sum. \n\
+RunInParallel -> Bool - is an optional parameter indicating whether the sum has to be performed using Mathematica's parallel processing functionality or not. The default value of Bool is False. \n\
+NumericalPrecision -> PositiveIntegers - is an optional parameter of SumAllSeries[], which determines the precision of the numerical value of the series representation. The default value is MachinePrecision.";
 n::"usage"="Summation Indices";
-RunInParallel::"usage"="RunInParallel -> Bool is an optional parameter of SumAllSeries[], indicating whether the sum to be performed using Mathematica's parallel processing functionality. The default value of Bool is False.";
-NumericalPrecision::"usage"="NumericalPrecision -> PositiveIntegers is an optional parameter of SumAllSeries[], which determines the precision of the numerical value of the series representation. The default value is MachinePrecision.";
+Substitute::"usage"="Substitute -> {} - is an optional parameter of MBRep[], to substitute the values of parameters appearing in the arguments of the gamma functions in the MB integrand";
+TakeLimit::"usage"="Substitute -> {} - is an optional parameter of MBRep[], to substitute the values of parameters appearing in the arguments of the gamma functions in the MB integrand";
+RunInParallel::"usage"="RunInParallel -> Bool - is an optional parameter of SumAllSeries[], indicating whether the sum to be performed using Mathematica's parallel processing functionality. The default value of Bool is False.";
+NumericalPrecision::"usage"="NumericalPrecision -> PositiveIntegers - is an optional parameter of SumAllSeries[], which determines the precision of the numerical value of the series representation. The default value is MachinePrecision.";
 
 
 Begin["`Private`"]
 
 
-MBRep[PreFac_,IntVar_,MBVar_,MBArg_]:={PreFac,IntVar,MBVar,MBArg} 
+MBRep[PreFacRaw_,IntVar_,MBVar_,MBArg_,OptionsPattern[{Substitute->{},TakeLimit->{}}]]:=Module[{MBArgNew=(RemoveCommonGamma@MBArg)/.OptionValue[Substitute],
+Contour,IntVarNew,ContourString,AllVariables,PreFac=PreFacRaw/.OptionValue[Substitute]},
+If[Length@IntVar=!=Length@MBVar,Print["The number of Integration variables and MB variables should be same."]; Abort[];];
+
+Which[ContainsOnly[Head@#&/@IntVar,{Rule}],
+IntVarNew=First@#&/@IntVar;
+Contour=Last@#&/@IntVar; 
+ContourString=Table[StringJoin[{ToString[Re[ToString[IntVarNew[[i]],StandardForm]],StandardForm]," = ",ToString[Contour[[i]],StandardForm]}],{i,Length@IntVarNew}];
+Print["Straight Contour : ",ContourString];
+AllVariables=Variables[Flatten[MBArgNew/.OptionValue[TakeLimit]]];
+If[Length@AllVariables>Length@IntVarNew,Print["Please provide the values of the following parameters : ",Complement[AllVariables,IntVarNew]];Abort[]];
+Return[StraightToNonStraight[PreFac,IntVarNew,MBVar,MBArgNew,Contour,OptionValue[TakeLimit]]],
+
+ContainsNone[Head@#&/@IntVar,{Rule}],
+Print["Non-Straight Contours."];
+Return[{PreFac,IntVar,MBVar,MBArgNew}],
+
+True,
+Print["Input not in correct format! Please see the documentation."]
+];
+
+];
+
+
+MBRep[X___]:=If[Length@List@X!=4,Print["Four arguments expected, but ",Length@List@X," given."];Abort[]]
+
+
+RemoveCommonGamma[NumDen_]:=Module[{Counter=1,CurrentNum,Num=Reverse[NumDen[[1]]],Den=NumDen[[2]],RemovePos},
+While[Counter<=Length@Num,CurrentNum=Num[[Counter]];
+If[MemberQ[Den,CurrentNum],Den=DeleteElements[Den,1->{CurrentNum}];Num=DeleteElements[Num,1->{CurrentNum}],Counter++];
+];
+Return[{Reverse@Num,Den}]];
+
+
+StraightToNonStraight[PreFactor_,IntVar_,MBVar_,MBIntegrand_,Contour_,TakeLimit_]:=Module[{Num=MBIntegrand[[1]],
+Den=MBIntegrand[[2]],NumContour,NumContourLim,NegativeNumPos,NegativeNum,NegativeNumVal,NewPrefactor=PreFactor,MBArg},
+
+NumContour=Num/.Table[IntVar[[i]]->Contour[[i]],{i,Length@IntVar}];
+NumContourLim=NumContour/.TakeLimit;
+If[And@@(!Element[#,NonPositiveIntegers]&/@NumContourLim),Nothing,Print["Contour ill-defined! It passes through one or more poles of the MB integral."]; Abort[]];
+NegativeNumPos=Table[If[NumContourLim[[i]]<0,i ,Nothing,Nothing],{i,Length@Num}];
+NegativeNum=Num[[NegativeNumPos]];
+NegativeNumVal=Abs[IntegerPart/@NumContourLim[[NegativeNumPos]]];
+Do[{Num,Den,NewPrefactor}=TransformMB[NegativeNumVal[[i]],NegativeNum[[i]],Num,Den,NewPrefactor],{i,Length@NegativeNum}];
+If[Length@NegativeNum>0,Num=SortBy[Num,Length[MonomialList@#]&]];
+MBArg=RemoveCommonGamma[{Num,Den}];
+Return[{NewPrefactor,IntVar,MBVar,MBArg}]
+]
+
+
+TransformMB[n_,z_,Num_,Den_,Prefactor_]:=Module[{NewNum=DeleteElements[Num,1->{z}],NewDen,NewPrefactor},
+NewNum=Join[NewNum,{-n-z,1+n+z}];NewDen=Join[Den,{1-z}];NewPrefactor=Prefactor*(-1)^(n+1);
+Return[{NewNum,NewDen,NewPrefactor}]];
 
 
 positionDuplicates[l_]:=Module[{list=l},GatherBy[Range@Length[list],list[[#]]&]];
@@ -82,9 +136,14 @@ Return[{RetTup,Comb,Poles,R,B,NumDenIntCof,Degenerate,RR,Msg1,SGN}]
 ]
 
 
-FindIntersection[MBRepVars_,RequestedSeries_]:=Module[{IntVar=MBRepVars[[2]],RetTup,Comb,Poles,R,B,NumDenIntCof,Degenerate,RR,SeriesRepCount=0,Counter=0,Branch=1,Dim=MBRepDim[MBRepVars],F={},Reg,Labels,NextLabel,IntersectingLabel,LargestSubsetQ,CrossProd,AllPosSub=Subsets[Range[MBRepDim[MBRepVars]],{MBRepDim[MBRepVars]-1}], MasterCH ={},MasterCHNorVec ={},MasterCHBasVec ={},MasterPoles ={},MasterCharList={},MasterSeriesVar ={},Msg2={},j,RepeatedTermLabel,temp,Msg1,SGN,DupTuplesList,UniqueTuples,CombLabels},
+FindIntersection[MBRepVars_,RequestedSeries_]:=Module[{IntVar=MBRepVars[[2]],RetTup,Comb,Poles,R,B,NumDenIntCof,Degenerate,RR,SeriesRepCount=0,
+Counter=0,Branch=1,Dim=MBRepDim[MBRepVars],F={},Reg,Labels,NextLabel,IntersectingLabel,
+LargestSubsetQ,CrossProd,AllPosSub=Subsets[Range[MBRepDim[MBRepVars]],{MBRepDim[MBRepVars]-1}], MasterCH ={},
+MasterCHNorVec ={},MasterCHBasVec ={},MasterPoles ={},MasterCharList={},MasterSeriesVar ={},Msg2={},j,RepeatedTermLabel,
+temp,Msg1,SGN,DupTuplesList,UniqueTuples,CombLabels},
 
 {RetTup,Comb,Poles,R,B,NumDenIntCof,Degenerate,RR,Msg1,SGN}=FindAllGoodComb[MBRepVars];
+Poles=Expand@Poles;
 
 B=Sort/@B;
 DupTuplesList=positionDuplicates@B;
@@ -105,7 +164,9 @@ If[IntersectingLabel==0,
 LargestSubsetQ=Catch[Do[If[SubsetQ[F[[i]],UniqueTuples[[Labels]]],Throw[False]],{i,SeriesRepCount}];Throw[True]];
 If[LargestSubsetQ,
 CombLabels=Sort[Flatten[DupTuplesList[[Labels]]]];
-If[Degenerate,
+
+Which[Degenerate&&(Dim>=2),
+
 MasterCH=Insert[MasterCH,FullSimplify[And@@B[[Labels]]],-1];
 MasterCHNorVec=Insert[MasterCHNorVec,temp=MasterCH[[++SeriesRepCount]];Table[Coefficient[Subtract@@(temp[[i]]),Evaluate@RR],{i,Dim}],-1];
 MasterCHBasVec=Insert[MasterCHBasVec,Table[CrossProd=Cross@@(MasterCHNorVec[[SeriesRepCount]][[i]]);
@@ -118,9 +179,19 @@ MasterCharList=Insert[MasterCharList,Join[NumDenIntCof/.MasterPoles[[SeriesRepCo
 Do[If[MemberQ[RepeatedTermLabel,i]||MemberQ[RepeatedTermLabel,j],Continue[]];If[FullSimplify[Total@MasterCharList[[SeriesRepCount]][[{i,j}]]]===0,RepeatedTermLabel=Union[RepeatedTermLabel,{i,j}]],{i,1,Length@MasterCharList[[SeriesRepCount]]-1},{j,i+1,Length@MasterCharList[[SeriesRepCount]]}];
 MasterCharList[[SeriesRepCount]]=Delete[MasterCharList[[SeriesRepCount]],Table[{RepeatedTermLabel[[i]]},{i,Length[RepeatedTermLabel]}]]//FullSimplify;
 MasterSeriesVar=Insert[MasterSeriesVar,Table[Times@@((MBVar@MBRepVars)^Coefficient[IntVar/.MasterPoles[[SeriesRepCount]],Subscript[n, i]]),{i,Dim}],-1];
-Msg2=Append[Msg2,StringForm["\!\(\*StyleBox[\"Series\",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\" \",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\"Solution\",FontWeight->\"Bold\"]\) `1` :: Intersecting Conic Hulls `2`. The set of poles are :: `3` with master series characteristic list and variables `4`."
-,SeriesRepCount,Subscript[C,Sequence@@Comb[[#]]]&/@CombLabels,Poles[[#]]&/@CombLabels,Join[{MasterCharList[[SeriesRepCount]]},{MasterSeriesVar[[SeriesRepCount]]}]]] ,
-Msg2=Append[Msg2,StringForm["\!\(\*StyleBox[\"Series\",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\" \",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\"Solution\",FontWeight->\"Bold\"]\) `1` :: Intersecting Conic Hulls `2`. The set of poles are :: `3`.",
+Msg2=Append[Msg2,StringForm["\!\(\*StyleBox[\"Series\",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\" \",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\"Solution\",FontWeight->\"Bold\"]\) `1` :: Intersecting Conic Hulls `2`. The set of poles is :: `3` with master series characteristic list and variables `4`."
+,SeriesRepCount,Subscript[C,Sequence@@Comb[[#]]]&/@CombLabels,Poles[[#]]&/@CombLabels,Join[{MasterCharList[[SeriesRepCount]]},{MasterSeriesVar[[SeriesRepCount]]}]]] 
+
+,Degenerate&&(Dim===1),
+MasterCharList=Insert[MasterCharList,Subscript[n,1],-1];
+If[ContainsOnly[SGN[[CombLabels]],{-1}],MasterSeriesVar=Insert[MasterSeriesVar,MBVar@MBRepVars,-1],MasterSeriesVar=Insert[MasterSeriesVar,1/MBVar@MBRepVars,-1]];
+
+Msg2=Append[Msg2,StringForm["\!\(\*StyleBox[\"Series\",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\" \",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\"Solution\",FontWeight->\"Bold\"]\) `1` :: Intersecting Conic Hulls `2`. The set of poles is :: `3` with master series characteristic list and variables `4`."
+,++SeriesRepCount,Subscript[C,Sequence@@Comb[[#]]]&/@CombLabels,Poles[[#]]&/@CombLabels,Join[{MasterCharList[[SeriesRepCount]]},{MasterSeriesVar[[SeriesRepCount]]}]]]
+
+,!Degenerate,
+
+Msg2=Append[Msg2,StringForm["\!\(\*StyleBox[\"Series\",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\" \",FontWeight->\"Bold\"]\)\!\(\*StyleBox[\"Solution\",FontWeight->\"Bold\"]\) `1` :: Intersecting Conic Hulls `2`. The set of poles is :: `3`.",
 ++SeriesRepCount,Subscript[C,Sequence@@Comb[[#]]]&/@CombLabels,Poles[[#]]&/@CombLabels]]];
 PrintTemporary["Number of Series Solution Found :: ", SeriesRepCount];
 F=Insert[F,CombLabels,-1]];
@@ -162,9 +233,15 @@ Return[{SingFacLabels,AssociatePoles,DivConCond}];
 ]
 
 
-GroupSingFactors[MBRepVars_,FSeriesSol_,Comb_,Poles_,SGN_]:=Module[{GroupFacLabels={},NumberNum=NumLength[MBRepVars],Dim=MBRepDim[MBRepVars],Cof=Rest@MakeCof[MBRepVars],SingFacLabels,OnlyNumLabels,CommonLabelsPos,LabelPos,LabelInsert,CounterTuple,CounterTupleSets,IdealCheck,SingCombSum,SingCombSum1,ErrorIndicator,GroupCounter,CommonLabels,RepeatedCombLabel,co,F1={},AssociatePoles,DivConCond},
+GroupSingFactors[MBRepVars_,FSeriesSol_,Comb_,Poles_,SGN_]:=Module[{GroupFacLabels={},NumberNum=NumLength[MBRepVars],Dim=MBRepDim[MBRepVars],
+Cof=Rest@MakeCof[MBRepVars],SingFacLabels,OnlyNumLabels,CommonLabelsPos,LabelPos,LabelInsert,CounterTuple,CounterTupleSets,IdealCheck,
+SingCombSum,SingCombSum1,ErrorIndicator,GroupCounter,CommonLabels,RepeatedCombLabel,co,F1={},AssociatePoles,DivConCond,SignFacsLabelsNum},
 
 {SingFacLabels,AssociatePoles,DivConCond}=FindSingFactors[MBRepVars,FSeriesSol,Comb,Poles,SGN];
+
+If[Dim===1,
+GroupFacLabels=Table[{{Intersection[i, Range@NumberNum]}}, {i, SingFacLabels}];
+Return[{SingFacLabels,AssociatePoles,DivConCond,GroupFacLabels}]];
 
 Do[
 OnlyNumLabels=Table[If[p<= NumberNum,p,Nothing],{p,SingFacLabels[[d]]}];
@@ -226,12 +303,18 @@ Return[{SingFacLabels,AssociatePoles,DivConCond,GroupFacLabels}];
 
 
 
-CalculateResidue[MBRepVars_,FSeriesSol_,Comb_,Poles_,SGN_]:=Module[{IntVar=MBRepVars[[2]],Dim=MBRepDim[MBRepVars],Cof=Rest@MakeCof[MBRepVars],NumDen=MergeNumDen[MBRepVars],AssociatePoles,SingFacLabels,DivConCond,GroupFacLabels,SeriesNumber=0,NumberNum=NumLength[MBRepVars],  NumDenIntPart, GenReflection,NumDenPoleSub,NumDenPoleShift,GenRefSub,Integrand,IntegrandSub,NumeratorFac,DenSingFac,TransformedVar,TransformMatrix,IntVarSwap,GbBasis,OverallFac,NumFacReduce,NumFacMonoList,RefinedFac,SeriesCof ,series={},SeriesCondition,Msg3={},seriestemp},
+CalculateResidue[MBRepVars_,FSeriesSol_,Comb_,Poles_,SGN_]:=Module[{IntVar=MBRepVars[[2]],Dim=MBRepDim[MBRepVars],Cof=Rest@MakeCof[MBRepVars],
+NumDen=MergeNumDen[MBRepVars],AssociatePoles,SingFacLabels,DivConCond,GroupFacLabels,SeriesNumber=0,NumberNum=NumLength[MBRepVars],
+  NumDenIntPart, GenReflection,NumDenPoleSub,NumDenPoleShift,GenRefSub,Integrand,IntegrandSub,NumeratorFac,DenSingFac,TransformedVar,
+  TransformMatrix,IntVarSwap,GbBasis,OverallFac,NumFacReduce,NumFacMonoList,RefinedFac,SeriesCof ,series={},
+  SeriesCondition,Msg3={},seriestemp,ContourSign,SignSGN,SignFacsLabelsNum},
+
 
 {SingFacLabels,AssociatePoles,DivConCond,GroupFacLabels}=GroupSingFactors[MBRepVars,FSeriesSol,Comb,Poles,SGN];
 
+
 SeriesCondition={};
-GenReflection[x_,y_]:=((-1)^-y Gamma[1-x]Gamma[1+x])/Gamma[1-y-x]; (* Generalized Relflection Formula *)
+GenReflection[x_,y_]:=((-1)^(-y) Gamma[1-x]Gamma[1+x])/Gamma[1-y-x]; (* Generalized Relflection Formula *)
 NumDenIntPart=Total[Cof[[#]]*IntVar]&/@Range[Length@NumDen];
 
 Do[
@@ -264,7 +347,13 @@ SeriesCof={};
 Do[RefinedFac=Insert[RefinedFac,Table[Denominator[FactorTermsList[NumFacMonoList[[i]]][[2]]/TransformedVar[[j]]],{j,Dim}],-1];
 SeriesCof=Insert[SeriesCof,FactorTermsList[NumFacMonoList[[i]]/Times@@TransformedVar][[1]],-1],{i,Length@NumFacMonoList}];
 
-seriestemp=(OverallFac)^(-1) Sum[SeriesCof[[j]]*MultivariateResidue[IntegrandSub,RefinedFac[[j]],Table[IntVar[[i]]-> 0,{i,Dim}]],{j,Length@RefinedFac}]//Simplify;
+
+If[Dim===1, 
+SignFacsLabelsNum=Select[Flatten[SingFacLabels],MemberQ[Range@NumberNum,#]&];
+SignSGN=SGN[[SignFacsLabelsNum]];
+Which[ContainsOnly[SignSGN,{-1}],ContourSign=-1,ContainsOnly[SignSGN,{1}],ContourSign=1,True,Print["Some Issues!"]],ContourSign=1];
+
+seriestemp=(OverallFac)^(-1) Sum[SeriesCof[[j]]*MultivariateResidue[ContourSign*IntegrandSub,RefinedFac[[j]],Table[IntVar[[i]]-> 0,{i,Dim}]],{j,Length@RefinedFac}]//Simplify;
 
 If[seriestemp===0,Continue[],SeriesNumber++;series=Insert[series,seriestemp,-1]];
 SeriesCondition=Insert[SeriesCondition,DivConCond[[k]],-1];
@@ -280,13 +369,15 @@ ResolveMB[MBRepInput__]:=Module[{msg1, msg2,t2,MBRepVars={MBRepInput}[[1]],MaxRe
 TimeTaken=AbsoluteTiming[If[Length@{MBRepInput}==1,MaxRequestedSeries=Infinity,MaxRequestedSeries={MBRepInput}[[2]]];
 t2=FindIntersection[MBRepVars,MaxRequestedSeries];
 {msg1,msg2}=t2[[{4,5}]];
-Print[""];Print[msg1];Print[""];
+Print[""];Print[msg1];
+Print["Found ",Length@msg2," series solutions."];
+Print[""];
 Do[Print[msg2[[i]]]; Print[""],{i,Length[msg2]}]];
 Print["Time Taken ",TimeTaken[[1]]," seconds"];
 Return[t2]]
 
 
-EvaluateSeries[ResMB_,MBParaSub_,SeriesNum_]:=Module[{t3,msg3,SeriesNumber,TotalSeries=ResMB[[7]],msg4,TimeTaken},
+EvaluateSeries[ResMB_,MBParaSub_List,SeriesNum_Integer]:=Module[{t3,msg3,SeriesNumber,TotalSeries=ResMB[[7]],msg4,TimeTaken},
 TimeTaken=AbsoluteTiming[If[SeriesNum>TotalSeries,Print["The series number to be evaluated is greater than the total number of series solution found."];Abort[]];
 t3=CalculateResidue@@(Join[{ResMB[[8]],ResMB[[1]][[SeriesNum]]},ResMB[[{2,3,6}]]]/.MBParaSub);
 SeriesNumber=t3[[1]];
@@ -302,7 +393,8 @@ Return[t3]
 Options[SumAllSeries]={RunInParallel-> False,NumericalPrecision -> MachinePrecision};
 SumAllSeries[SeriesInfo_,MBVarSub_,lim_,OptionsPattern[]]:=Module[{SeriesNumber=SeriesInfo[[1]],SeriesSub=SeriesInfo[[2]]/.MBVarSub,
 SeriesCondition=SeriesInfo[[5]],Dim=SeriesInfo[[4]],sumlim,nseries={},SumCommand,TimeTaken},
-TimeTaken=AbsoluteTiming[Which[OptionValue[RunInParallel]===False,SumCommand=Sum;Off[General::munfl];
+TimeTaken=AbsoluteTiming[If[lim \[NotElement] NonNegativeIntegers,Print["Summation upper-limit should be a nonnegative integer"];Abort[]];
+Which[OptionValue[RunInParallel]===False,SumCommand=Sum;Off[General::munfl];
  Off[General::stop],OptionValue[RunInParallel]===True,SumCommand=ParallelSum;ParallelEvaluate[Off[General::munfl]];
  ParallelEvaluate[Off[General::stop]]];
 sumlim=Table[{Subscript[n, i],0,lim},{i,Dim}];
@@ -313,12 +405,16 @@ SeriesExtract=SeriesSub[[i]],RequestedPrecision=OptionValue[NumericalPrecision]}
 nseries=Insert[nseries,SumCommand[If[CondExtract,N[SeriesExtract,RequestedPrecision]//Quiet,0],Evaluate[Sequence@@sumlim]],-1]],{i,SeriesNumber}]];
 Print["Numerical Result: ",N[Total@nseries,OptionValue[NumericalPrecision]]//Quiet];
 Print["Time Taken ",TimeTaken[[1]]," seconds"];
+(*New*)
+Return[N[Total@nseries,OptionValue[NumericalPrecision]]//Quiet]
 ]
 
 
 End[];
 EndPackage[];
-Print["B.Ananthanarayan, S.Banik, S.Friot, S.Ghosh"];
+Print["Last Updated: \!\(\*SuperscriptBox[\(22\), \(th\)]\) December, 2022"];
+Print["Version 1.1 by S. Banik, S. Friot"];
+Print["Version 1.0 by B.Ananthanarayan, S.Banik, S.Friot, S.Ghosh"];
 
 
 
