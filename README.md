@@ -1,9 +1,9 @@
 # MBConicHulls
 MBConicHulls: a Mathematica package to evaluate N-fold MB integrals.
 
-Version 1.1 can evaluate MB integrals with straight-contours. It can also evaluate one-fold MB integrals. More details can be found in [2212.XXXXX].
+Version 1.1 can evaluate MB integrals with straight-contours. It can also evaluate one-fold MB integrals. More details can be found in [2212.11839](https://arxiv.org/abs/2212.11839).
 
-Version 1.0 can evaluate two-higher fold MB integrals with non-straight contours. It is identical to the one published in [2012.15108](https://arxiv.org/abs/2012.15108) and [Phys. Rev. Lett. 127, 151601](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.127.151601).
+Version 1.0 can evaluate two or higher-fold MB integrals with non-straight contours. It is identical to the one published in [2012.15108](https://arxiv.org/abs/2012.15108) and [Phys. Rev. Lett. 127, 151601](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.127.151601).
 
 ```
 ███╗   ███╗██████╗  ██████╗ ██████╗ ███╗   ██╗██╗ ██████╗██╗  ██╗██╗   ██╗██╗     ██╗     ███████╗
