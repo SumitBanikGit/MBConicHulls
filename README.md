@@ -16,7 +16,7 @@ Version 1.0 can evaluate two or higher-fold MB integrals with non-straight conto
 
 ```
 
-MBConicHulls.wl needs the Mathematica package [MultivariateResidues.m](https://arxiv.org/abs/1701.01040).
+MBConicHulls.wl uses the Mathematica package [MultivariateResidues.m](https://arxiv.org/abs/1701.01040).
 
 Pentagon.nb needs the packages [FIESTA5](https://bitbucket.org/feynmanIntegrals/fiesta/src), [MB.m](https://mbtools.hepforge.org/) and [MBresolve.m](https://mbtools.hepforge.org/). 
 
