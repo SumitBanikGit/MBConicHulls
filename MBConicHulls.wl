@@ -122,7 +122,7 @@ Return[{NewNum,NewDen,NewPrefactor}]];
 
 
 (* ::Input::Initialization::Plain:: *)
-CanonicalMB[STNS_]:=Module[{Num=STNS[[4,1]],Den=STNS[[4,2]],Prefactor=STNS[[1]],MBVar=STNS[[3]],IntVarNew=STNS[[2]],Dim=Length@STNS[[2]],IntVarPos,NewPos,STNSReturn,y,IntVarTrans,AllPosSol,Sub,IntVarNewSub,VarPow},
+CanonicalMB[STNS_]:=Module[{Num=STNS[[4,1]],Den=STNS[[4,2]],Prefactor=STNS[[1]],MBVar=STNS[[3]],IntVarNew=STNS[[2]],Dim=Length@STNS[[2]],IntVarPos,NewPos,STNSReturn,y,IntVarTrans,AllPosSol,Sub,IntVarNewSub,VarPow,MBVarNew},
 
 IntVarTrans=Subscript[y, #]&/@Range@Dim;
 AllPosSol=Subsets[Range@Length@Num,{Length@IntVarNew}];
@@ -135,11 +135,11 @@ If[Length@Sub===0,Print["MB Representation can't be transformed into canonical f
 Num=Num/.Sub/.Table[IntVarTrans[[i]]->IntVarNew[[i]],{i,Dim}];
 Den=Den/.Sub/.Table[IntVarTrans[[i]]->IntVarNew[[i]],{i,Dim}];
 IntVarNewSub=IntVarNew/.Sub;
-MBVar=Table[VarPow=Coefficient[IntVarNewSub,IntVarTrans[[i]]];
+MBVarNew=Table[VarPow=Coefficient[IntVarNewSub,IntVarTrans[[i]]];
 Times@@(MBVar^VarPow)
 ,{i,Dim}];
 Prefactor=Prefactor*Times@@Power[MBVar,IntVarNewSub/.Table[i->0,{i,IntVarTrans}]];
-Return[{Prefactor,IntVarNew,MBVar,{Num,Den}}]
+Return[{Prefactor,IntVarNew,MBVarNew,{Num,Den}}]
 ]
 
 
@@ -651,7 +651,7 @@ t2=ReplacePart[t2,1->FSort];
 Return[t2]]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Module to find solutions using Triangulation Approach*)
 
 
