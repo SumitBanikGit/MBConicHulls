@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Package Initialization*)
 
 
@@ -82,7 +82,7 @@ PrintSeries::"usage"="is an optional parameter of EvaluateSeries[] which specifi
 ShortestOnly::"usage"="is an optional parameter of TriangulateMB[] which specifies whether to only print the solution with shortest number of sets of poles or not. Its default value is False.";
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Internal Modules*)
 
 
@@ -540,7 +540,7 @@ PrintTemporary["Done!"];
 Return[{SeriesNumber,series,Msg3,Dim,SeriesCondition}]]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*External Modules*)
 
 
@@ -931,5 +931,5 @@ Return[N[Total@nseries,OptionValue[NumericalPrecision]]//Quiet]
 
 End[];
 EndPackage[];
-Print["Last Updated: \!\(\*SuperscriptBox[\(10\), \(th\)]\) August, 2023"];
-Print["Version 1.2 by S. Banik, S. Friot"];
+Print["Last Updated: \!\(\*SuperscriptBox[\(25\), \(th\)]\) October, 2023"];
+Print["Version 1.2.1 by S. Banik, S. Friot"];
