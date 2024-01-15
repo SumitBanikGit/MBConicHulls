@@ -82,7 +82,7 @@ PrintSeries::"usage"="is an optional parameter of EvaluateSeries[] which specifi
 ShortestOnly::"usage"="is an optional parameter of TriangulateMB[] which specifies whether to only print the solution with shortest number of sets of poles or not. Its default value is False.";
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Internal Modules*)
 
 
@@ -540,7 +540,7 @@ PrintTemporary["Done!"];
 Return[{SeriesNumber,series,Msg3,Dim,SeriesCondition}]]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*External Modules*)
 
 
@@ -578,7 +578,7 @@ Abort[];
 ];
 If[OptionValue@CanonicalTransform,
 PrintTemporary["Transforming into canonical form"];
-STNSReturn=CanonicalMB[STNSReturn];
+STNSReturn=CanonicalMB[STNSReturn]//FullSimplify;
 STNSReturn=ReArrangeMB[STNSReturn];
 ];
 ];
@@ -651,7 +651,7 @@ t2=ReplacePart[t2,1->FSort];
 Return[t2]]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Module to find solutions using Triangulation Approach*)
 
 
@@ -690,7 +690,7 @@ ResolveMBOut=ResolveMB[MBRepInput,MaxSolutions->MaxSol];
 BreakTri=True;
 Return@ResolveMBOut;];
 
-If[QSolve,TPCommand="points2placingtriang";,
+If[QSolve,TPCommand="points2placingtriang",
 
 {RetTup,Comb,Poles,R,B,NumDenIntCof,Degenerate,RR,Msg1,SGN}=FindAllGoodComb[MBRepVars];
  Print@Msg1;
@@ -699,6 +699,7 @@ If[QSolve,TPCommand="points2placingtriang";,
 
 
 A=Transpose@A;
+
 PrintTemporary["Running Topcom"];
 
 If[(Head[Card]===Integer||Head[MaxCard]===Integer)&&(!RegOnly),Print["Cannot set cardinality or maxcardinality for non-regular triangulations!"];Abort[]];
@@ -713,7 +714,8 @@ If[RequestCard,PrintTemporary["Checking Cardinality"]];
 If[RequestMaxCard,PrintTemporary["Checking MaxCardinality"]];
 
 While[Length@AllTriangulations===0,
-AllTriangulations=FindTriangulations[A,OptionValue@TopComPath,TopComOptions,MaxRequestedSeries,CardMsg,TPCommand];];
+AllTriangulations=FindTriangulations[A,OptionValue@TopComPath,TopComOptions,MaxRequestedSeries,CardMsg,TPCommand];
+];
 PrintTemporary["Done!"];
 
 
@@ -925,11 +927,11 @@ Return[N[Total@nseries,OptionValue[NumericalPrecision]]//Quiet]
 ]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*End Message*)
 
 
 End[];
 EndPackage[];
-Print["Last Updated: \!\(\*SuperscriptBox[\(25\), \(th\)]\) October, 2023"];
-Print["Version 1.2.1 by S. Banik, S. Friot"];
+Print["Last Updated: \!\(\*SuperscriptBox[\(8\), \(th\)]\) December, 2023"];
+Print["Version 1.2.2 by S. Banik, S. Friot"];
