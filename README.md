@@ -24,7 +24,7 @@ MBConicHulls.wl needs the Mathematica package [MultivariateResidues.m](https://a
 
 Pentagon.nb and Examples.nb need the packages [FIESTA5](https://bitbucket.org/feynmanIntegrals/fiesta/src), [MB.m](https://mbtools.hepforge.org/) and [MBresolve.m](https://mbtools.hepforge.org/). 
 
-Examples_PolyGamma additionally need the package [EvaluateMultiSums](https://www3.risc.jku.at/research/combinat/software/EvaluateMultiSums/index.php)
+Examples_PolyGamma.nb additionally need the package [EvaluateMultiSums](https://www3.risc.jku.at/research/combinat/software/EvaluateMultiSums/index.php).
 
 For more packages related to MB integrals, [see](https://bitbucket.org/feynmanIntegrals/mb/src/master/).
 
