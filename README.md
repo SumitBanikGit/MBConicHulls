@@ -1,7 +1,7 @@
 # MBConicHulls
 MBConicHulls: a Mathematica package to evaluate N-fold MB integrals.
 
-Version 1.3 can evaluate MB integrals with polygamma functions, both using the conic hull and triangulation approaches. More details can be found in [2512.XXXXX](https://arxiv.org/abs/2512.XXXXX).
+Version 1.3 can evaluate MB integrals with polygamma functions, both using the conic hull and triangulation approaches. More details can be found in [2512.19803](https://arxiv.org/abs/2512.19803).
 
 Version 1.2 can evaluate MB integrals using the triangulation approach, which is much faster than the conic hull method for higher-fold MB integrals. More details can be found in [2309.00409](https://arxiv.org/abs/2309.00409) (published version [here](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.110.036002)).
 
