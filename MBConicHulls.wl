@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Package Initialization*)
 
 
@@ -16,7 +16,7 @@ Block[{Print}, Get["MultivariateResidues`"];]
 Off[SymbolName::sym];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Command Usage*)
 
 
@@ -1184,4 +1184,5 @@ Return[N[Total@nseries,OptionValue[NumericalPrecision]]//Quiet]
 End[];
 EndPackage[];
 Print["Last Updated: \!\(\*SuperscriptBox[\(12\), \(th\)]\) December, 2025"];
+Print["Version 1.0 by B. Ananthanarayan, S. Banik, S. Ghosh & S. Friot"];
 Print["Version 1.3.4 by S. Banik & S. Friot"];
