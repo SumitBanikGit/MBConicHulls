@@ -902,8 +902,6 @@ MBRepInput=Most[MBRepIn],DumVar=MBRepIn[[-1]],CheckCommand},
 If[OptionValue@MBNumber>Length@MBRepInput, Print["The series number to be evaluated is greater than the total number of series solution found."];Abort[]];
 If[Length@MBRepInput>1, Print["Solving MB Number : ",MBNumberVal]];
 
-CheckCommand="which "<>OptionValue[TopComPath]<>"points2triangs";
-If[StringLength[RunProcess[$SystemShell,"StandardOutput",CheckCommand]]===0, Print["We could not find TOPCOM executables at ",OptionValue[TopComPath]];Abort[]];
 
 MBRepVars=MBRepInput[[MBNumberVal]][[{1,2,3,4}]];
 Dim=MBRepDim[MBRepInput[[MBNumberVal]]];
@@ -933,6 +931,9 @@ If[QSolve&&(Head[Card]===Integer||Head[MaxCard]===Integer),Print["Cardinality or
 {A,ATrim,NumLength}=FindMBAMatrix[MBRepVarsFlatten];
 
 Print["The associated A-matrix for this MB integral is ",ATrim//MatrixForm];
+
+CheckCommand="which "<>OptionValue[TopComPath]<>"points2triangs";
+If[StringLength[RunProcess[$SystemShell,"StandardOutput",CheckCommand]]===0, Print["We could not find TOPCOM executables at ",OptionValue[TopComPath],". Please provide the correct location using the ", Style["TopComPath", Bold]," option."];Abort[]];
 
 If[Length@ATrim===1,Print["Triangulation Method currently works only when the A-matrix is not a row-matrix!"];
 Print["Switching to the Conic Hull Method."];
@@ -1185,4 +1186,4 @@ End[];
 EndPackage[];
 Print["Last Updated: \!\(\*SuperscriptBox[\(12\), \(th\)]\) December, 2025"];
 Print["Version 1.0 by B. Ananthanarayan, S. Banik, S. Ghosh & S. Friot"];
-Print["Version 1.3.4 by S. Banik & S. Friot"];
+Print["Version 1.3.5 by S. Banik & S. Friot"];
