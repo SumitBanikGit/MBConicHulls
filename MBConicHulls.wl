@@ -443,7 +443,7 @@ Return[DumVarPow]
 
 FindSingFactors[MBRepVars_,FSeriesSol_,Comb_,Poles_,SGN_]:=(*FindSingFactors[MBRepVars,FSeriesSol,Comb,Poles,SGN]=*)Module[{TempCond,PositiveDefinite,
 NumberNum=NumLength[MBRepVars],NumDen=MergeNumDen[MBRepVars],Dim=MBRepDim[MBRepVars],DivConCond={},SingFacLabels={},AssociatePoles={},IntVar=MBRepVars[[2]],
-ConGamma,NumDenSub,NumDenSubD,NumDenSubN,DivGamma={},ConDivGamma={},SumVar,DivCond,ConCond,SingComb,NonSingComb,PoleSubstitute},
+ConGamma,NumDenSub,NumDenSubD,NumDenSubN,DivGamma={},ConDivGamma={},SumVar,DivCond,ConCond,SingComb,NonSingComb,PoleSubstitute,existsIntQ},
 
 SumVar=Subscript[n, #]&/@Range[Dim];
 PositiveDefinite=And@@((#>=0)&/@SumVar);
@@ -456,13 +456,44 @@ NumDenSubN=Numerator@NumDenSub;
 DivGamma={};
 ConDivGamma={};
 
-Do[If[Resolve[Exists[Evaluate[SumVar],Evaluate[SumVar]\[Element]Integers,Evaluate@NumDenSubN[[j]]<= 0&&Mod[Evaluate@NumDenSubN[[j]],Evaluate@NumDenSubD[[j]]]==0&&Evaluate@PositiveDefinite]],If[Resolve[Exists[Evaluate[SumVar],Evaluate[SumVar]\[Element]Integers,Evaluate@NumDenSubN[[j]]>0 ||Mod[Evaluate@NumDenSubN[[j]],Evaluate@NumDenSubD[[j]]]!= 0 && Evaluate@PositiveDefinite]],ConDivGamma=Insert[ConDivGamma,j,-1],DivGamma=Insert[DivGamma,j,-1]]],{j,Complement[Range[Length[NumDen]],Comb[[i]],ConGamma]}];
+existsIntQ[expr_] := Module[{fi,val,time=5}, fi = TimeConstrained[
+Check[FindInstance[Evaluate[SumVar] \[Element] Integers && Evaluate[expr],SumVar, Integers],{}]//Quiet,time,{}];
+If[fi =!= {}, val=True,val=Resolve[Exists[Evaluate[SumVar], Evaluate[SumVar] \[Element] Integers, Evaluate[expr]]]];
+Return[val]
+];
+
+
+Do[If[existsIntQ[NumDenSubN[[j]] <= 0 &&Mod[NumDenSubN[[j]], NumDenSubD[[j]]] == 0 &&PositiveDefinite],
+If[existsIntQ[(NumDenSubN[[j]] > 0 &&PositiveDefinite)||(Mod[NumDenSubN[[j]], NumDenSubD[[j]]] != 0&&PositiveDefinite) ],
+ConDivGamma=Insert[ConDivGamma,j,-1],DivGamma=Insert[DivGamma,j,-1]]],{j,Complement[Range[Length[NumDen]],Comb[[i]],ConGamma]}];
+
+(*Do[If[Resolve[Exists[Evaluate[SumVar],Evaluate[SumVar]\[Element]Integers,Evaluate@NumDenSubN[[j]]<= 0&&Mod[Evaluate@NumDenSubN[[j]],Evaluate@NumDenSubD[[j]]]==0&&Evaluate@PositiveDefinite]],
+If[Resolve[Exists[Evaluate[SumVar],Evaluate[SumVar]\[Element]Integers,Evaluate@NumDenSubN[[j]]>0 ||Mod[Evaluate@NumDenSubN[[j]],Evaluate@NumDenSubD[[j]]]!= 0 && Evaluate@PositiveDefinite]],
+ConDivGamma=Insert[ConDivGamma,j,-1],DivGamma=Insert[DivGamma,j,-1]]],{j,Complement[Range[Length[NumDen]],Comb[[i]],ConGamma]}];
+*)
+
+
 Do[DivCond=True;ConCond=True;SingComb=Union[DivGamma,o];If[MemberQ[SingFacLabels,Sort[Union[Comb[[i]],SingComb]]],Continue[]];NonSingComb=Complement[ConDivGamma,o];
+
+DivCond = And@@(Table[NumDenSubN[[k]] <= 0 &&Mod[NumDenSubN[[k]], NumDenSubD[[k]]] == 0,{k, SingComb}]);
+ConCond = And@@(Table[(NumDenSubN[[l]] > 0||Mod[NumDenSubN[[l]], NumDenSubD[[l]]] != 0),{l, NonSingComb}]);
+TempCond = FullSimplify[DivCond && ConCond && PositiveDefinite,Evaluate[SumVar] \[Element] Integers];
+If[existsIntQ[TempCond],DivConCond=Insert[DivConCond,TempCond,-1];SingFacLabels=Insert[SingFacLabels,Sort[Union[Comb[[i]],SingComb]],-1];AssociatePoles=Insert[AssociatePoles,Poles[[i]],-1],Nothing,Print["Error 3 ::",DivCond&&ConCond]]
+,{o,Subsets[ConDivGamma]}]
+
+
+(*Do[DivCond=True;ConCond=True;SingComb=Union[DivGamma,o];If[MemberQ[SingFacLabels,Sort[Union[Comb[[i]],SingComb]]],Continue[]];NonSingComb=Complement[ConDivGamma,o];
 Do[DivCond=And[DivCond,FullSimplify[Evaluate@NumDenSubN[[k]]<= 0&&Mod[Evaluate@NumDenSubN[[k]],Evaluate@NumDenSubD[[k]]]==0 && Evaluate@PositiveDefinite,Evaluate[SumVar]\[Element]Integers]],{k,SingComb}];
 Do[ConCond=And[ConCond,FullSimplify[Evaluate@NumDenSubN[[l]]>0 ||Mod[Evaluate@NumDenSubN[[l]],Evaluate@NumDenSubD[[l]]]!= 0  && Evaluate@PositiveDefinite,Evaluate[SumVar]\[Element]Integers]],{l,NonSingComb}];
 If[TempCond=FullSimplify[DivCond&&ConCond&&Evaluate@PositiveDefinite,Evaluate[SumVar]\[Element]Integers];Resolve[Exists[Evaluate[SumVar],Evaluate[SumVar]\[Element]Integers,TempCond]],DivConCond=Insert[DivConCond,TempCond,-1];SingFacLabels=Insert[SingFacLabels,Sort[Union[Comb[[i]],SingComb]],-1];AssociatePoles=Insert[AssociatePoles,Poles[[i]],-1],Nothing,Print["Error 3 ::",DivCond&&ConCond]]
 ,{o,Subsets[ConDivGamma]}]
+*)
+
 ,{i,FSeriesSol}];
+
+(*Print["SingFacLabels \[Rule]",SingFacLabels];
+Print["AssociatePoles \[Rule]",AssociatePoles];
+Print["DivConCond \[Rule]",DivConCond];*)
 
 Return[{SingFacLabels,AssociatePoles,DivConCond}];
 ]
@@ -618,11 +649,18 @@ Do[
 NumDenPoleSub=NumDenFlat/.(IntVar[[#]]-> AssociatePoles[[k]][[#]]&/@Range@Dim)/.DumVarZero//Simplify;
 NumDenPoleShift=NumDenFlat/.(IntVar[[#]]->IntVar[[#]]+ AssociatePoles[[k]][[#]]&/@Range@Dim)//Simplify;
 GenRefSub=Table[If[!MemberQ[PolyGammaLabel,j],Gamma@NumDenPoleShift[[j]]-> GenReflection[NumDenIntDumPart[[j]],NumDenPoleSub[[j]]],PolyGamma[First[MBRepVars[[4,1]][[j]]],NumDenPoleShift[[j]]]->1],{j,SingFacLabels[[k]]}];
-(*Print["NumDenPoleSub ", NumDenPoleSub];
+GenRefSub=GenRefSub//ExpandAll;
+
+(*Print["NumDenFlat ",NumDenFlat];
+Print["IntSub ",(IntVar[[#]]->IntVar[[#]]+ AssociatePoles[[k]][[#]]&/@Range@Dim)];
+Print["DumVarZero ",DumVarZero];
+Print["NumDenPoleSub ", NumDenPoleSub];
+Print["NumDenPoleShift ", NumDenPoleShift//ExpandAll];
 Print["GenRefSub ", GenRefSub];*)
 
-Integrand=MBRepVars[[1]]* ( (Times@@Gamma/@NumGamma) (Times@@(PolyGamma@@#&/@NumPolyGamma)) Times@@(MBRepVars[[3]]^MBRepVars[[2]]))/Times@@(Gamma/@DenGamma);
 
+Integrand=MBRepVars[[1]]* ( (Times@@Gamma/@NumGamma) (Times@@(PolyGamma@@#&/@NumPolyGamma)) Times@@(MBRepVars[[3]]^MBRepVars[[2]]))/Times@@(Gamma/@DenGamma);
+Integrand=Integrand//ExpandAll;
 (*IntegrandDerLim = Integrand;
 Do[
 DumVarD=DumVarSequence[[s]];
@@ -630,14 +668,15 @@ IntegrandDerLim = D[IntegrandDerLim,DumVarD];
 ,{s,Length@DumVarSequence}];
 IntegrandDerLim =IntegrandDerLim//Limit[#,DumVarZero]&;*)
 
-IntegrandSub=Simplify[Integrand/.(IntVar[[#]]->IntVar[[#]]+ AssociatePoles[[k]][[#]]&/@Range@Dim)]/.GenRefSub;
+IntegrandSub=ExpandAll@(Simplify[Integrand/.(IntVar[[#]]->IntVar[[#]]+ AssociatePoles[[k]][[#]]&/@Range@Dim)])/.GenRefSub;
 NumeratorFac=Product[If[l>NumberNum,NumDenIntDumPart[[l]],1],{l,SingFacLabels[[k]]}];
 NumeratorFac=NumeratorFac*Product[If[MemberQ[PolyGammaLabel,l],GenReflectionPG[First[MBRepVars[[4,1]][[l]]],NumDenIntPart[[l]],NumDenPoleSub[[l]]],1],{l,SingFacLabels[[k]]}];
 DenSingFacGammaAll= Table[If[l<=NumberNum,NumDenIntDumPart[[l]],Nothing],{l,SingFacLabels[[k]]}];
 DenSingFacDumGammaAll = Select[ DenSingFacGammaAll,ContainsAny[DumVarOnly,Variables[#]]&];
 DenSingPow =ConstantArray[-1,Length@DenSingFacDumGammaAll];
 
-
+(*Print["Integrand ", Integrand];
+Print["IntegrandSub ", IntegrandSub];*)
 
 (*Print["Integrand ", Integrand];
 Print["IntegrandDerLim ", IntegrandDerLim];*)
@@ -1184,6 +1223,6 @@ Return[N[Total@nseries,OptionValue[NumericalPrecision]]//Quiet]
 
 End[];
 EndPackage[];
-Print["Last Updated: \!\(\*SuperscriptBox[\(12\), \(th\)]\) December, 2025"];
+Print["Last Updated: \!\(\*SuperscriptBox[\(30\), \(th\)]\) May, 2026"];
 Print["Version 1.0 by B. Ananthanarayan, S. Banik, S. Ghosh & S. Friot"];
-Print["Version 1.3.6 by S. Banik & S. Friot"];
+Print["Version 1.3.8 by S. Banik & S. Friot"];
