@@ -851,7 +851,7 @@ MaxRequestedSeries=OptionValue[MaxSolutions],TimeTaken,LengthMessage = "",Length
 Dim,Degenerate,F,FSort,Comb,Poles,CombLabels,MasterCharList={},MasterSeriesVar ={},Msg2={},RearrangePos,
 PrintSol=OptionValue@PrintSolutions,MasterSeriesQ=OptionValue@MasterSeries,MBRepInput=Most[MBRepIn],DumVar=MBRepIn[[-1]]},
 
-If[OptionValue@MBNumber>Length@MBRepInput, Print["The series number to be evaluated is greater than the total number of series solution found."];Abort[]];
+If[OptionValue@MBNumber>Length@MBRepInput, Print["The MB number to be evaluated is greater than the total number of series solution found."];Abort[]];
 If[Length@MBRepInput>1, Print["Solving MB Number : ",OptionValue@MBNumber]];
 
 MBRepVars=MBRepInput[[OptionValue@MBNumber]];
@@ -938,7 +938,7 @@ ProportionalQ,AnyProportionalQ,Cof,Num,NumCof,DenCof,Delta,ResolveMBOut,BreakTri
 NumGamma,DenGamma,NumFlat,DenFlat,MBRepVarsFlatten,NumGammaCof,DenGammaCof,NumDenIntGammaCof,MBRepVarsGamma,
 MBRepInput=Most[MBRepIn],DumVar=MBRepIn[[-1]],CheckCommand},
 
-If[OptionValue@MBNumber>Length@MBRepInput, Print["The series number to be evaluated is greater than the total number of series solution found."];Abort[]];
+If[OptionValue@MBNumber>Length@MBRepInput, Print["The MB number to be evaluated is greater than the total number of series solution found."];Abort[]];
 If[Length@MBRepInput>1, Print["Solving MB Number : ",MBNumberVal]];
 
 
@@ -976,7 +976,7 @@ If[StringLength[RunProcess[$SystemShell,"StandardOutput",CheckCommand]]===0, Pri
 
 If[Length@ATrim===1,Print["Triangulation Method currently works only when the A-matrix is not a row-matrix!"];
 Print["Switching to the Conic Hull Method."];
-ResolveMBOut=ResolveMB[MBRepInput,MaxSolutions->MaxSol,MBNumber->MBNumberVal];
+ResolveMBOut=ResolveMB[MBRepIn,MaxSolutions->MaxSol,MBNumber->OptionValue@MBNumber];
 BreakTri=True;
 Return@ResolveMBOut;];
 If[QSolve,TPCommand="points2placingtriang",
@@ -1052,6 +1052,7 @@ Cof=Rest[MakeCof[MBRepVarsGamma]];
 NumGammaCof=IntVar . Cof[[#]]&/@Range[Length@NumGamma];
 DenGammaCof=IntVar . Cof[[#]]&/@Range[Length@NumGamma+1,Length@Cof];
 NumDenIntGammaCof=Join[NumGammaCof,-DenGammaCof];
+NumDenIntCof=NumDenIntGammaCof=Join[NumGammaCof,-DenGammaCof];
 Delta=Total@NumDenIntGammaCof;
 
 
@@ -1223,6 +1224,6 @@ Return[N[Total@nseries,OptionValue[NumericalPrecision]]//Quiet]
 
 End[];
 EndPackage[];
-Print["Last Updated: \!\(\*SuperscriptBox[\(30\), \(th\)]\) May, 2026"];
+Print["Last Updated: \!\(\*SuperscriptBox[\(6\), \(th\)]\) June, 2026"];
 Print["Version 1.0 by B. Ananthanarayan, S. Banik, S. Ghosh & S. Friot"];
-Print["Version 1.3.8 by S. Banik & S. Friot"];
+Print["Version 1.4 by S. Banik & S. Friot"];
